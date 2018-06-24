@@ -13,7 +13,7 @@ GAME RULES:
 */
 
 
-var scores, roundScore, activePlayer;
+var scores, roundScore, activePlayer, winningScore;
 
 init();
 
@@ -34,7 +34,7 @@ document.querySelector('.btn-roll').addEventListener('click',function(){
     if(dice !== 1){
         // Add score
         roundScore += dice;
-        updateScoreUI('current-',activePlayer,roundScore);
+        updateUI('current-',activePlayer,roundScore);
     }else{
         // Next player
         nextPlayer();
@@ -48,14 +48,17 @@ document.querySelector('.btn-hold').addEventListener('click',function(){
     scores[activePlayer] += roundScore;
 
     // Update the UI
-    updateScoreUI('score-',activePlayer, scores[activePlayer]);
+    updateUI('score-',activePlayer, scores[activePlayer]);
 
     // Check if player won the game
-    if(scores[activePlayer] >= 100){
-        document.querySelector('.player-'+activePlayer+'-panel').classList.add('winner');
-        document.querySelector('.player-'+activePlayer+'-panel').classList.remove('active');
-        document.getElementById('name-'+activePlayer).textContent = 'WINNER'
-        disableBtns();
+    if(scores[activePlayer] >= winningScore){
+
+        addClass('player-'+activePlayer+'-panel','winner');
+        removeClass('player-'+activePlayer+'-panel','active');
+
+        updateUI('name-',activePlayer,'WINNER');
+        
+        disableBtns(true);
     }else{
         nextPlayer();
     }
@@ -63,7 +66,15 @@ document.querySelector('.btn-hold').addEventListener('click',function(){
     
 });
 
+// New game event handling
+document.querySelector('.btn-new').addEventListener('click',function(){
+    if(confirm('You want to play a new game?')){
+        init();
+    }
+});
+
 //#endregion
+
 
 //#region functions
 
@@ -72,37 +83,66 @@ function init(){
     scores = [0,0];
     roundScore = 0;
     activePlayer = 0;
+    winningScore = 100;
 
-    updateScoreUI('score-',0,0);
-    updateScoreUI('score-',1,0);
-    updateScoreUI('current-',0,0);
-    updateScoreUI('current-',1,0);
+    updateUI('score-',0,0);
+    updateUI('score-',1,0);
+    updateUI('current-',0,0);
+    updateUI('current-',1,0);
 
     hideDiceImage();
+    disableBtns(false);
+
+    removeClass('player-0-panel','winner');
+    removeClass('player-1-panel','winner');
+
+    removeClass('player-0-panel','active');
+    removeClass('player-1-panel','active');
+
+    addClass('player-0-panel','active');
+
+    var player_1 = prompt('player 1 name ? ');
+    var player_2 = prompt('player 2 name ? ');
+
+    player_1 = player_1 !== '' ? player_1 : 'Player 1'; 
+    player_2 = player_2 !== '' ? player_2 : 'Player 2'; 
+
+    updateUI('name-',0,player_1);
+    updateUI('name-',1,player_2);
+
 }
 
 function hideDiceImage(){
     document.querySelector('.dice').style.display = 'none';
 }
 
-function updateScoreUI(id,player,score){
-    document.getElementById(id+player).textContent = score;
+function updateUI(element,id,data){
+    document.getElementById(element+id).textContent = data;
 }
 
 function nextPlayer(){
     activePlayer = activePlayer ? 0 : 1;
     roundScore = 0;
+    updateUI('current-',0,0);
+    updateUI('current-',1,0);
 
-    updateScoreUI('current-',0,0);
-    updateScoreUI('current-',1,0);
-
-    document.querySelector('.player-0-panel').classList.toggle('active');
-    document.querySelector('.player-1-panel').classList.toggle('active');
+    toggleClass('player-0-panel','active');
+    toggleClass('player-1-panel','active');
 }
 
-function disableBtns(){
-    document.querySelector('.btn-roll').disabled = true;
-    document.querySelector('.btn-hold').disabled = true;
+function disableBtns(bool){
+    document.querySelector('.btn-roll').disabled = Boolean(bool);
+    document.querySelector('.btn-hold').disabled = Boolean(bool);
+}
+
+function addClass(htmlElementClass,cssClass){
+    document.querySelector('.'+htmlElementClass).classList.add(cssClass);
+}
+function removeClass(htmlElementClass,cssClass){
+    document.querySelector('.'+htmlElementClass).classList.remove(cssClass);
+}
+function toggleClass(htmlElementClass,cssClass){
+    document.querySelector('.'+htmlElementClass).classList.toggle(cssClass);
 }
 
 //#endregion
