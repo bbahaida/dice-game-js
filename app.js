@@ -17,8 +17,9 @@ const currentTag = 'current';
 const nameTag = 'name';
 const prefixPlayerPanelTag = 'player';
 const sefixPlayerPanelTag = 'panel';
+const scoreInputTag = 'final-score';
 
-var scores, roundScore, prevDice, activePlayer, winningScore;
+var scores, roundScore, prevDice, activePlayer, winningScore, changeScoreAllowed;
 
 init();
 
@@ -27,15 +28,21 @@ init();
 
 // Roll the dice event handling
 document.querySelector('.btn-roll').addEventListener('click',function(){
+
     // 1. Random number
+    if(changeScoreAllowed){
+        if(!confirm('you want to perceed the game with the winning score = '+winningScore+'?')){
+            return;
+        }
+        document.getElementById(scoreInputTag).value = winningScore;
+        changeScoreAllowed = false;
+    }
     var dice = Math.floor(Math.random() *6) + 1;
 
     // 2. Display the result
     var diceDOM = document.querySelector('.dice');
     diceDOM.style.display = 'block';
     diceDOM.src = 'dice-'+dice+'.png';
-
-    
 
     // 3. Update the score IF the rolled number was NOT 1 
     if(dice === 6 && prevDice[activePlayer] === 6){
@@ -59,32 +66,48 @@ document.querySelector('.btn-roll').addEventListener('click',function(){
 
 // Hold the score event handling
 document.querySelector('.btn-hold').addEventListener('click',function(){
-    // Add CURRENT score to GLOBAL score
-    scores[activePlayer] += roundScore;
+    if(!changeScoreAllowed){
+        // Add CURRENT score to GLOBAL score
+        scores[activePlayer] += roundScore;
 
-    // Update the UI
-    updateUI(scoreTag,activePlayer, scores[activePlayer]);
+        // Update the UI
+        updateUI(scoreTag,activePlayer, scores[activePlayer]);
 
-    // Check if player won the game
-    if(scores[activePlayer] >= winningScore){
+        // Check if player won the game
+        if(scores[activePlayer] >= winningScore){
 
-        addClass(prefixPlayerPanelTag+'-'+activePlayer+'-'+sefixPlayerPanelTag,'winner');
-        removeClass(prefixPlayerPanelTag+'-'+activePlayer+'-'+sefixPlayerPanelTag,'active');
+            addClass(prefixPlayerPanelTag+'-'+activePlayer+'-'+sefixPlayerPanelTag,'winner');
+            removeClass(prefixPlayerPanelTag+'-'+activePlayer+'-'+sefixPlayerPanelTag,'active');
 
-        updateUI(nameTag,activePlayer,'WINNER');
-        
-        disableBtns(true);
-    }else{
-        nextPlayer();
-    }
-
-    
+            updateUI(nameTag,activePlayer,'WINNER');
+            
+            disableBtns(true);
+        }else{
+            nextPlayer();
+        }
+    }  
 });
 
 // New game event handling
 document.querySelector('.btn-new').addEventListener('click',function(){
     if(confirm('You want to play a new game?')){
         init();
+    }
+});
+
+document.querySelector('.btn-score').addEventListener('click',function(){
+    if(changeScoreAllowed){
+        var score = Number(document.getElementById(scoreInputTag).value).valueOf();
+        if(typeof score !== 'number' || isNaN(score)){
+            alert('impossible');
+        }else if(score<=0){
+            alert('score must be > 0');
+        }
+        else if(confirm('You want to set score to '+score+'?')){
+            winningScore = score;
+            changeScoreAllowed = false;
+        }
+        
     }
 });
 
@@ -100,6 +123,10 @@ function init(){
     activePlayer = 0;
     prevDice = [0,0];
     winningScore = 100;
+    changeScoreAllowed = true;
+
+
+    document.getElementById(scoreInputTag).value = '';
 
     updateUI(scoreTag,0,0);
     updateUI(scoreTag,1,0);
@@ -117,11 +144,13 @@ function init(){
 
     addClass(prefixPlayerPanelTag+'-0-'+sefixPlayerPanelTag,'active');
 
-    var player_1 = prompt('player 1 name ? ');
-    var player_2 = prompt('player 2 name ? ');
+    //var player_1 = prompt('player 1 name ? ');
+    //var player_2 = prompt('player 2 name ? ');
+    var player_1 = 'Player 1'
+    var player_2 = 'Player 2'
 
-    player_1 = player_1 ? player_1 : 'Player 1'; 
-    player_2 = player_2 ? player_2 : 'Player 2'; 
+    //player_1 = player_1 ? player_1 : 'Player 1'; 
+    //player_2 = player_2 ? player_2 : 'Player 2'; 
 
     updateUI(nameTag,0,player_1);
     updateUI(nameTag,1,player_2);

@@ -2,6 +2,7 @@
 *** GENERAL
 **********************************************/
 
+
 * {
     margin: 0;
     padding: 0;
@@ -137,9 +138,10 @@ i {
     transition: margin 0.3s;
 }
 
-.btn-new { top: 45px;}
-.btn-roll { top: 403px;}
-.btn-hold { top: 467px;}
+.btn-new { top: 55px;}
+.btn-roll { top: 390px;}
+.btn-hold { top: 455px;}
+.btn-score{ top: 555px;}
 
 .dice {
     position: absolute;
@@ -152,3 +154,21 @@ i {
 
 .winner { background-color: #f7f7f7; }
 .winner .player-name { font-weight: 300; color: #EB4D4D; }
+
+.final-score{
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    top: 500px;
+    color: #555;
+    font-size: 18px;
+    font-family: 'Lato';
+    text-align: center;
+    padding: 10px;
+    width: 160px;
+    text-transform: uppercase;
+}
+
+.final-score:focus{
+    outline: none;
+}
