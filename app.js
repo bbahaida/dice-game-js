@@ -18,6 +18,8 @@ const nameTag = 'name';
 const prefixPlayerPanelTag = 'player';
 const sefixPlayerPanelTag = 'panel';
 const scoreInputTag = 'final-score';
+const dice1Tag = 'dice-1';
+const dice2Tag = 'dice-2';
 
 var scores, roundScore, prevDice, activePlayer, winningScore, changeScoreAllowed;
 
@@ -35,32 +37,42 @@ document.querySelector('.btn-roll').addEventListener('click',function(){
             return;
         }
         document.getElementById(scoreInputTag).value = winningScore;
+        document.getElementById(scoreInputTag).disabled = true;
+        
         changeScoreAllowed = false;
     }
-    var dice = Math.floor(Math.random() *6) + 1;
+    var dice1 = Math.floor(Math.random() *6) + 1;
+    var dice2 = Math.floor(Math.random() *6) + 1;
 
     // 2. Display the result
-    var diceDOM = document.querySelector('.dice');
-    diceDOM.style.display = 'block';
-    diceDOM.src = 'dice-'+dice+'.png';
+    var dice1DOM = document.querySelector('.'+dice1Tag);
+    var dice2DOM = document.querySelector('.'+dice2Tag);
+    dice1DOM.style.display = 'block';
+    dice1DOM.src = 'dice-'+dice1+'.png';
+    dice2DOM.style.display = 'block';
+    dice2DOM.src = 'dice-'+dice2+'.png';
 
     // 3. Update the score IF the rolled number was NOT 1 
-    if(dice === 6 && prevDice[activePlayer] === 6){
+    if((dice1 === 6 || dice2 === 6) && prevDice[activePlayer] === 6){
         // Player looses score
         roundScore = 0;
         scores[activePlayer] = 0;
         updateUI(scoreTag,activePlayer,0);
         nextPlayer();
-        hideDiceImage();
-    }else if(dice !== 1){
+        //hideDiceImage();
+    }else if(dice1 !== 1 && dice2 !== 1){
         // Add score
-        roundScore += dice;
-        prevDice[activePlayer] = dice;
+        roundScore += dice1+dice2;
+        if(dice1 === 6){
+            prevDice[activePlayer] = 6;
+        }else if(dice2 === 6){
+            prevDice[activePlayer] = 6;
+        }
         updateUI(currentTag,activePlayer,roundScore);
     }else{
         // Next player
         nextPlayer();
-        hideDiceImage();
+        //hideDiceImage();
     }
 });
 
@@ -105,6 +117,7 @@ document.querySelector('.btn-score').addEventListener('click',function(){
         }
         else if(confirm('You want to set score to '+score+'?')){
             winningScore = score;
+            document.getElementById(scoreInputTag).disabled = true;
             changeScoreAllowed = false;
         }
         
@@ -127,6 +140,7 @@ function init(){
 
 
     document.getElementById(scoreInputTag).value = '';
+    document.getElementById(scoreInputTag).disabled = false;
 
     updateUI(scoreTag,0,0);
     updateUI(scoreTag,1,0);
@@ -146,6 +160,7 @@ function init(){
 
     //var player_1 = prompt('player 1 name ? ');
     //var player_2 = prompt('player 2 name ? ');
+
     var player_1 = 'Player 1'
     var player_2 = 'Player 2'
 
@@ -158,7 +173,8 @@ function init(){
 }
 
 function hideDiceImage(){
-    document.querySelector('.dice').style.display = 'none';
+    document.querySelector('.'+dice1Tag).style.display = 'none';
+    document.querySelector('.'+dice2Tag).style.display = 'none';
 }
 
 function updateUI(element,id,data){
