@@ -12,8 +12,13 @@ GAME RULES:
 
 */
 
+const scoreTag = 'score';
+const currentTag = 'current';
+const nameTag = 'name';
+const prefixPlayerPanelTag = 'player';
+const sefixPlayerPanelTag = 'panel';
 
-var scores, roundScore, activePlayer, winningScore;
+var scores, roundScore, prevDice, activePlayer, winningScore;
 
 init();
 
@@ -30,11 +35,21 @@ document.querySelector('.btn-roll').addEventListener('click',function(){
     diceDOM.style.display = 'block';
     diceDOM.src = 'dice-'+dice+'.png';
 
+    
+
     // 3. Update the score IF the rolled number was NOT 1 
-    if(dice !== 1){
+    if(dice === 6 && prevDice[activePlayer] === 6){
+        // Player looses score
+        roundScore = 0;
+        scores[activePlayer] = 0;
+        updateUI(scoreTag,activePlayer,0);
+        nextPlayer();
+        hideDiceImage();
+    }else if(dice !== 1){
         // Add score
         roundScore += dice;
-        updateUI('current-',activePlayer,roundScore);
+        prevDice[activePlayer] = dice;
+        updateUI(currentTag,activePlayer,roundScore);
     }else{
         // Next player
         nextPlayer();
@@ -48,15 +63,15 @@ document.querySelector('.btn-hold').addEventListener('click',function(){
     scores[activePlayer] += roundScore;
 
     // Update the UI
-    updateUI('score-',activePlayer, scores[activePlayer]);
+    updateUI(scoreTag,activePlayer, scores[activePlayer]);
 
     // Check if player won the game
     if(scores[activePlayer] >= winningScore){
 
-        addClass('player-'+activePlayer+'-panel','winner');
-        removeClass('player-'+activePlayer+'-panel','active');
+        addClass(prefixPlayerPanelTag+'-'+activePlayer+'-'+sefixPlayerPanelTag,'winner');
+        removeClass(prefixPlayerPanelTag+'-'+activePlayer+'-'+sefixPlayerPanelTag,'active');
 
-        updateUI('name-',activePlayer,'WINNER');
+        updateUI(nameTag,activePlayer,'WINNER');
         
         disableBtns(true);
     }else{
@@ -83,32 +98,33 @@ function init(){
     scores = [0,0];
     roundScore = 0;
     activePlayer = 0;
+    prevDice = [0,0];
     winningScore = 100;
 
-    updateUI('score-',0,0);
-    updateUI('score-',1,0);
-    updateUI('current-',0,0);
-    updateUI('current-',1,0);
+    updateUI(scoreTag,0,0);
+    updateUI(scoreTag,1,0);
+    updateUI(currentTag,0,0);
+    updateUI(currentTag,1,0);
 
     hideDiceImage();
     disableBtns(false);
 
-    removeClass('player-0-panel','winner');
-    removeClass('player-1-panel','winner');
+    removeClass(prefixPlayerPanelTag+'-0-'+sefixPlayerPanelTag,'winner');
+    removeClass(prefixPlayerPanelTag+'-1-'+sefixPlayerPanelTag,'winner');
 
-    removeClass('player-0-panel','active');
-    removeClass('player-1-panel','active');
+    removeClass(prefixPlayerPanelTag+'-0-'+sefixPlayerPanelTag,'active');
+    removeClass(prefixPlayerPanelTag+'-1-'+sefixPlayerPanelTag,'active');
 
-    addClass('player-0-panel','active');
+    addClass(prefixPlayerPanelTag+'-0-'+sefixPlayerPanelTag,'active');
 
     var player_1 = prompt('player 1 name ? ');
     var player_2 = prompt('player 2 name ? ');
 
-    player_1 = player_1 !== '' ? player_1 : 'Player 1'; 
-    player_2 = player_2 !== '' ? player_2 : 'Player 2'; 
+    player_1 = player_1 ? player_1 : 'Player 1'; 
+    player_2 = player_2 ? player_2 : 'Player 2'; 
 
-    updateUI('name-',0,player_1);
-    updateUI('name-',1,player_2);
+    updateUI(nameTag,0,player_1);
+    updateUI(nameTag,1,player_2);
 
 }
 
@@ -117,17 +133,18 @@ function hideDiceImage(){
 }
 
 function updateUI(element,id,data){
-    document.getElementById(element+id).textContent = data;
+    document.getElementById(element+'-'+id).textContent = data;
 }
 
 function nextPlayer(){
     activePlayer = activePlayer ? 0 : 1;
     roundScore = 0;
-    updateUI('current-',0,0);
-    updateUI('current-',1,0);
+    prevDice = [0,0];
+    updateUI(currentTag,0,0);
+    updateUI(currentTag,1,0);
 
-    toggleClass('player-0-panel','active');
-    toggleClass('player-1-panel','active');
+    toggleClass(prefixPlayerPanelTag+'-0-'+sefixPlayerPanelTag,'active');
+    toggleClass(prefixPlayerPanelTag+'-1-'+sefixPlayerPanelTag,'active');
 }
 
 function disableBtns(bool){
